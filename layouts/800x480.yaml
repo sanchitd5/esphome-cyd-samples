@@ -4,9 +4,13 @@ font: !include
     text_sm: 26
     text_md: 30
     text_lg: 34
+    text_xl: 48
+    text_xxl: 64
     icons_sm: 26
     icons_md: 32
     icons_lg: 40
+    icons_xl: 48
+    icons_xxl: 56
 
 .sizing:
   - &nav_widget_vars
