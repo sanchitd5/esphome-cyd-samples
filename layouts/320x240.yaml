@@ -14,44 +14,34 @@ font: !include
 
 .sizing:
   - &nav_widget_vars
-    height: 40px
+    height: 40
     padding: 4
 
   - &page_styles
     <<: !include styles/page_styles.yaml
-    pad_top: 40px
-    pad_bottom: 40px
+    pad_top: 40
+    pad_bottom: 40
 
   - &container_styles
     <<: !include styles/container_styles.yaml
-    pad_top: 0px
-    pad_bottom: 0px
-    pad_left: 4px
-    pad_right: 4px
+    pad_top: 0
+    pad_bottom: 0
+    pad_left: 4
+    pad_right: 4
     scrollable: false # prevents scrollbars on pages where space is used up to the last pixel
 
   - &button_layout
     <<: !include styles/button_layout.yaml
-    pad_column: 4px
-    pad_row: 5px
+    pad_column: 4
+    pad_row: 5
 
   - &button_widget_vars
-    width: 114px
-    height: 75px
+    width: 114
+    height: 75
 
   - &wide_button_widget_vars
-    width: 232px
-    height: 75px
-
-  - &printer_layout
-    <<: !include styles/printer_layout.yaml
-    pad_row: 4
-
-  - &printer_widget_vars
-    height: 56px
-    padding: 4px
-    bar_height: 22px
-    bar_padding: 5
+    width: 232
+    height: 75
 
 script:
   - id: go_home
@@ -93,21 +83,13 @@ lvgl:
                       text: Ceiling
                       <<: *button_widget_vars
 
-              - button: # futurama
+              - button: # volume up
                   <<: !include
-                    file: widgets/buttons/text_buttons/stateless.yaml
+                    file: widgets/buttons/icon_buttons/volume_buttons/vol_up.yaml
                     vars:
-                      uid: futurama
-                      text: Futurama
+                      uid: bedroom_tv_vol_up
+                      entity_id: media_player.bedroom_android_tv
                       <<: *button_widget_vars
-                  on_short_click:
-                    - homeassistant.action:
-                        action: homeassistant.turn_on
-                        data: { entity_id: script.futurama }
-                  on_long_press:
-                    - homeassistant.action:
-                        action: homeassistant.toggle
-                        data: { entity_id: media_player.bedroom_android_tv }
 
               - button: # rachel light
                   <<: !include
@@ -118,11 +100,11 @@ lvgl:
                       text: Rachel
                       <<: *button_widget_vars
 
-              - button: # volume up
+              - button: # volume down
                   <<: !include
-                    file: widgets/buttons/icon_buttons/volume_buttons/vol_up.yaml
+                    file: widgets/buttons/icon_buttons/volume_buttons/vol_down.yaml
                     vars:
-                      uid: bedroom_tv_vol_up
+                      uid: bedroom_tv_vol_down
                       entity_id: media_player.bedroom_android_tv
                       <<: *button_widget_vars
 
@@ -135,13 +117,53 @@ lvgl:
                       text: Ryan
                       <<: *button_widget_vars
 
-              - button: # volume down
+              - button: # play content
                   <<: !include
-                    file: widgets/buttons/icon_buttons/volume_buttons/vol_down.yaml
+                    file: widgets/buttons/text_buttons/stateless.yaml
                     vars:
-                      uid: bedroom_tv_vol_down
-                      entity_id: media_player.bedroom_android_tv
+                      uid: play_content_futurama
+                      text: Futurama
                       <<: *button_widget_vars
+                  on_short_click:
+                    - homeassistant.action:
+                        action: script.play_content_on_bedroom_chromecast
+                        data: { content: Futurama }
+                  on_long_press:
+                    - homeassistant.action:
+                        action: homeassistant.toggle
+                        data: { entity_id: media_player.bedroom_android_tv }
+
+              - button: # play content
+                  <<: !include
+                    file: widgets/buttons/text_buttons/stateless.yaml
+                    vars:
+                      uid: play_content_adventure_time
+                      text: "Adventure\nTime"
+                      <<: *button_widget_vars
+                  on_short_click:
+                    - homeassistant.action:
+                        action: script.play_content_on_bedroom_chromecast
+                        data: { content: Adventure Time }
+                  on_long_press:
+                    - homeassistant.action:
+                        action: homeassistant.toggle
+                        data: { entity_id: media_player.bedroom_android_tv }
+
+              - button: # play content
+                  <<: !include
+                    file: widgets/buttons/text_buttons/stateless.yaml
+                    vars:
+                      uid: play_content_american_dad
+                      text: American Dad
+                      <<: *button_widget_vars
+                  on_short_click:
+                    - homeassistant.action:
+                        action: script.play_content_on_bedroom_chromecast
+                        data: { content: American Dad }
+                  on_long_press:
+                    - homeassistant.action:
+                        action: homeassistant.toggle
+                        data: { entity_id: media_player.bedroom_android_tv }
 
     - id: living_room
       <<: *page_styles
@@ -167,6 +189,10 @@ lvgl:
                     - homeassistant.action:
                         action: media_player.toggle
                         data: { entity_id: media_player.living_room_tv }
+                  on_long_press:
+                    - homeassistant.action:
+                        action: media_player.toggle
+                        data: { entity_id: media_player.ryan_s_xbox }
 
               - button: # dim scene
                   <<: !include
@@ -377,70 +403,6 @@ lvgl:
                       text: Deck Lights
                       <<: *button_widget_vars
 
-    - id: printers_1
-      <<: *page_styles
-      on_load:
-        - lvgl.label.update:
-            id: page_title
-            text: Printers (1/2)
-      widgets:
-        - obj:
-            <<: *container_styles
-            layout:
-              <<: *printer_layout
-            widgets:
-              - obj: # printer 1
-                  <<: !include
-                    file: widgets/printers/widget.yaml
-                    vars:
-                      uid: printer_1
-                      name: 1 - Fred
-                      <<: *printer_widget_vars
-
-              - obj: # printer 2
-                  <<: !include
-                    file: widgets/printers/widget.yaml
-                    vars:
-                      uid: printer_2
-                      name: 2 - Wilma
-                      <<: *printer_widget_vars
-
-              - obj: # printer 3
-                  <<: !include
-                    file: widgets/printers/widget.yaml
-                    vars:
-                      uid: printer_3
-                      name: 3 - Barney
-                      <<: *printer_widget_vars
-
-              - obj: # printer 4
-                  <<: !include
-                    file: widgets/printers/widget.yaml
-                    vars:
-                      uid: printer_4
-                      name: 4 - Betty
-                      <<: *printer_widget_vars
-
-    - id: printers_2
-      <<: *page_styles
-      on_load:
-        - lvgl.label.update:
-            id: page_title
-            text: Printers (2/2)
-      widgets:
-        - obj:
-            <<: *container_styles
-            layout:
-              <<: *printer_layout
-            widgets:
-              - obj: # printer 5
-                  <<: !include
-                    file: widgets/printers/widget.yaml
-                    vars:
-                      uid: printer_5
-                      name: 5 - Dinno
-                      <<: *printer_widget_vars
-
 packages:
   # header
   header_sensors: !include { file: widgets/header/sensors.yaml }
@@ -540,31 +502,4 @@ packages:
   outside_light_2_widget_sensors: !include { file: widgets/buttons/icon_text_buttons/light_buttons/sensors.yaml, vars: {
     uid: outside_light_2,
     entity_id: light.outside_light_2
-  }}
-
-  # printers 1
-  printer_1_widget_sensors: !include { file: widgets/printers/sensors.yaml, vars: {
-    uid: printer_1,
-    entity_id_prefix: p1s_1
-  }}
-
-  printer_2_widget_sensors: !include { file: widgets/printers/sensors.yaml, vars: {
-    uid: printer_2,
-    entity_id_prefix: p1s_2
-  }}
-
-  printer_3_widget_sensors: !include { file: widgets/printers/sensors.yaml, vars: {
-    uid: printer_3,
-    entity_id_prefix: p1s_3
-  }}
-
-  printer_4_widget_sensors: !include { file: widgets/printers/sensors.yaml, vars: {
-    uid: printer_4,
-    entity_id_prefix: p1s_4
-  }}
-
-  # printers 2
-  printer_5_widget_sensors: !include { file: widgets/printers/sensors.yaml, vars: {
-    uid: printer_5,
-    entity_id_prefix: p1s_5
   }}
