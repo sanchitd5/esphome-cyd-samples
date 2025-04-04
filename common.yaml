@@ -15,6 +15,14 @@ ota:
   - platform: esphome
 
 api:
+  on_client_connected:
+    - globals.set:
+        id: homeassistant_ip
+        value: !lambda return client_address;
+
+switch:
+  - platform: restart
+    name: Restart
 
 binary_sensor:
   - platform: status
@@ -47,3 +55,7 @@ text_sensor:
     mac_address:
       name: Mac Address
       entity_category: diagnostic
+
+globals:
+  - id: homeassistant_ip
+    type: std::string
