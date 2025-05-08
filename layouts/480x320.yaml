@@ -501,9 +501,6 @@ packages:
   # boot screen
   boot_screen_sensors: !include { file: widgets/boot_screen/sensors.yaml }
 
-  # idle screen
-  idle_screen_sensors: !include { file: widgets/idle_screen/sensors.yaml }
-
   # bedroom
   bedroom_tv_widget_sensors: !include { file: widgets/bedroom_tv.sensor.yaml }
 
