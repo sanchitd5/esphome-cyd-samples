@@ -272,9 +272,6 @@ packages:
   # boot screen
   boot_screen_sensors: !include { file: widgets/boot_screen/sensors.yaml }
 
-  # idle screen
-  idle_screen_sensors: !include { file: widgets/idle_screen/sensors.yaml }
-
   # lighting
   second_floor_lights_widget_sensors: !include { file: widgets/buttons/icon_text_buttons/light_group_buttons/sensors.yaml, vars: {
     uid: second_floor_lights,
