@@ -80,7 +80,7 @@ touchscreen:
     update_interval: 16ms
     transform:
       swap_xy: true
-      mirror_x: true
+      mirror_y: true
     # reset_pin: 38
     # on_touch:
     #   - lambda: |-

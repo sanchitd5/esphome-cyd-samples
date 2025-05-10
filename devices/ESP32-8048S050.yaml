@@ -79,8 +79,8 @@ touchscreen:
     address: 0x5D
     update_interval: 16ms
     transform:
-      mirror_x: true
       swap_xy: true
+      mirror_y: true
     # reset_pin: 38
     # on_touch:
     #   - lambda: |-
