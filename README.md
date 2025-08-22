@@ -1,5 +1,7 @@
 # ESPHome + LVGL on cheap touchscreen devices
 
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/S6S21K2LK2)
+
 ## Supported Devices
 * Guition `JC3248W535` 3.5" with capacitive touch and USB-C. [AliExpress Link](https://www.aliexpress.com/item/1005007566046827.html).
 * Sunton `ESP32-2432S028R` 2.8" with resistive touch and USB micro-B. [AliExpress Link](https://www.aliexpress.com/item/1005004502250619.html).
