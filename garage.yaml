@@ -8,4 +8,4 @@ substitutions:
 packages:
   common: !include common.yaml
   device: !include devices/ESP32-2432S028R.yaml
-  layout: !include layouts/320x240.yaml
+  layout: !include layouts/garage.yaml

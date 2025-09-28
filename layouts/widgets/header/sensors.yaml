@@ -16,14 +16,37 @@ time:
               text:
                 time_format: "%I:%M %p"
                 time: ha_time
+      - hours: 2,3,4,5
+        minutes: 5
+        seconds: 0
+        then:
+          - switch.turn_on: switch_antiburn
+      - hours: 2,3,4,5
+        minutes: 35
+        seconds: 0
+        then:
+          - switch.turn_off: switch_antiburn
 
-# sensor:
-#   - id: thermostat_temp
-#     platform: homeassistant
-#     entity_id: sensor.thermostat_temperature
-#     on_value:
-#       - lvgl.label.update:
-#           id: header_temp
-#           text:
-#             format: "%.1f°C"
-#             args: [ 'x' ]
+switch:
+  - platform: template
+    name: Antiburn
+    id: switch_antiburn
+    icon: mdi:television-shimmer
+    optimistic: true
+    entity_category: "config"
+    turn_on_action:
+      - logger.log: "Starting Antiburn"
+      - if:
+          condition: lvgl.is_paused
+          then:
+            - lvgl.resume:
+            - lvgl.widget.redraw:
+      - lvgl.pause:
+          show_snow: true
+    turn_off_action:
+      - logger.log: "Stopping Antiburn"
+      - if:
+          condition: lvgl.is_paused
+          then:
+            - lvgl.resume:
+            - lvgl.widget.redraw:

@@ -3,7 +3,7 @@ api:
     - lvgl.widget.hide: boot_screen
 
 image:
-  - file: https://esphome.io/_static/favicon-512x512.png
+  - file: https://shibe.ink/cdn/shop/files/BulmamechanicStickersafe_SF_1024x1024@2x.png
     id: boot_logo
     resize: 200x200
     type: RGB565

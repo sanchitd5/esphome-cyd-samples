@@ -1,0 +1,70 @@
+binary_sensor:
+  - platform: homeassistant
+    id: back_door_door
+    entity_id: binary_sensor.back_door_door
+    publish_initial_state: true
+    on_state:
+      then:
+        - lvgl.widget.update:
+            id: indoor_door_status
+            state:
+              checked: !lambda return x;
+
+  - platform: homeassistant
+    id: garage_backyard_door_sensor_contact
+    entity_id: binary_sensor.garage_backyard_door_sensor_contact
+    publish_initial_state: true
+    on_state:
+      then:
+        - lvgl.widget.update:
+            id: backyard_door_status
+            state:
+              checked: !lambda return x;
+
+text_sensor:
+  - platform: homeassistant
+    id: door_status
+    entity_id: sensor.door_status
+    on_value:
+      then:
+        - lvgl.widget.update:
+            id: garage_door_btn
+            state:
+              checked: !lambda return (0 == x.compare(std::string{"opened"}));
+        - lvgl.label.update:
+            id: garage_door_icon
+            text: !lambda |-
+              static char buf[10];
+              std::string icon;
+              if (0 == x.compare(std::string{"opened"}) || (0 == x.compare(std::string{"open"})) ) {
+                  icon = "\U000F12D4"; // mdi:garage-open
+              } if (0 == x.compare(std::string{"opening"}) || (0 == x.compare(std::string{"closing"})) ) {
+                  // keep the same icon as closed while in transition
+                  icon = "\U000F0872"; // mdi:garage-alert
+              } else {
+                  icon = "\U000F06D9"; // mdi:garage
+              }
+              snprintf(buf, sizeof(buf), "%s", icon.c_str());
+              return buf;
+
+  - platform: homeassistant
+    id: lamp_status
+    entity_id: light.lamp
+    on_value:
+      then:
+        - lvgl.widget.update:
+            id: lamp_btn
+            state:
+              checked: !lambda return (0 == x.compare(std::string{"on"}));
+        - lvgl.label.update:
+            id: lamp_icon
+            text: !lambda |-
+              static char buf[10];
+              std::string icon;
+              if (0 == x.compare(std::string{"on"})) {
+                  icon = "\U000F0335"; // mdi-lightbulb
+              } else {
+                  icon = "\U000F0336"; // mdi-lightbulb-outline
+              }
+              snprintf(buf, sizeof(buf), "%s", icon.c_str());
+              return buf;

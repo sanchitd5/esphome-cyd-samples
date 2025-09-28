@@ -12,6 +12,8 @@ font: !include
     icons_xl: 40
     icons_xxl: 48
 
+
+
 .sizing:
   - &nav_widget_vars
     height: 40
@@ -24,8 +26,6 @@ font: !include
 
   - &container_styles
     <<: !include styles/container_styles.yaml
-    pad_top: 0
-    pad_bottom: 0
     pad_left: 4
     pad_right: 4
     scrollable: false # prevents scrollbars on pages where space is used up to the last pixel
@@ -112,7 +112,7 @@ lvgl:
                         id: garage_door_icon
                         align: TOP_MID
                         text_font: mdi_md
-                        text: "󰛙" # mdi:garage
+                        text: "\U000F06D9" # mdi:garage
                     - label:
                         align: BOTTOM_MID
                         text: 'Garage Door'
@@ -125,7 +125,7 @@ lvgl:
                   widgets:
                     - label:
                         align: CENTER
-                        text: 'Indoor Door'
+                        text: 'IndoorDoor'
 
               # Garage Backyard Door Status (stateful)
               - button:
@@ -135,7 +135,7 @@ lvgl:
                   widgets:
                     - label:
                         align: CENTER
-                        text: 'Backyard Door'
+                        text: 'BackyardDoor'
 
 packages:
   # header
