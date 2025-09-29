@@ -31,7 +31,16 @@ text_sensor:
             id: garage_door_btn
             state:
               checked: !lambda return (0 == x.compare(std::string{"opened"}));
-            checkable: !lambda return (0 == x.compare(std::string{"opened"}) || 0 == x.compare(std::string{"closed"}));
+              disabled: !lambda return (0 != x.compare(std::string{"opened"}) && 0 != x.compare(std::string{"closed"}));
+            bg_color: !lambda |-
+              if (0 == x.compare(std::string{"opened"})) {
+                return lv_color_hex(0x3A7AFE); // blue (opened)
+              } else if (0 == x.compare(std::string{"closed"})) {
+                return lv_color_hex(0xE0E3EB); // light gray (closed)
+              } else {
+                return lv_color_hex(0xFFD600); // yellow (other)
+              }
+
         - lvgl.label.update:
             id: garage_door_icon
             text: !lambda |-
