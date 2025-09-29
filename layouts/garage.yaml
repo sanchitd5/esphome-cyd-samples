@@ -51,6 +51,12 @@ script:
 lvgl:
   default_font: roboto_md
   theme: !include themes/main.yaml
+  on_idle:
+    timeout: !lambda "return (id(display_timeout).state * 1000);"
+    then:
+      - logger.log: "LVGL is idle"
+      - light.turn_off: backlight
+      - lvgl.pause:
   top_layer:
     widgets:
       - <<:

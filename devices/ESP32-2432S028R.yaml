@@ -90,8 +90,10 @@ touchscreen:
         - if:
             condition: lvgl.is_paused
             then:
+              - logger.log: "LVGL resuming"
               - lvgl.resume:
               - lvgl.widget.redraw:
+              - light.turn_on: backlight
     # on_touch:
     #   - lambda: |-
     #         ESP_LOGI("cal", "x=%d, y=%d, x_raw=%d, y_raw=%0d",
@@ -100,6 +102,19 @@ touchscreen:
     #           touch.x_raw,
     #           touch.y_raw
     #         );
+
+number:
+  - platform: template
+    name: LVGL Screen timeout
+    optimistic: true
+    id: display_timeout
+    unit_of_measurement: "s"
+    initial_value: 45
+    restore_value: true
+    min_value: 10
+    max_value: 180
+    step: 5
+    mode: box
 
 lvgl:
   buffer_size: 25%
