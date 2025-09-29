@@ -26,5 +26,10 @@
             indicator:
               arc_color: 0x080888
               arc_width: 4
+        - label:
+            text: "sanchitdang.com"
+            align: CENTER
+            text_color: 0x080888
+            y: 135
       on_press:
         - lvgl.widget.hide: boot_screen
