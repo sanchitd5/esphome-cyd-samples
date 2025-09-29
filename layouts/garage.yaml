@@ -12,8 +12,6 @@ font: !include
     icons_xl: 40
     icons_xxl: 48
 
-
-
 .sizing:
   - &nav_widget_vars
     height: 40
@@ -22,7 +20,7 @@ font: !include
   - &page_styles
     <<: !include styles/page_styles.yaml
     pad_top: 40
-    pad_bottom: 40
+    pad_bottom: 0
 
   - &container_styles
     <<: !include styles/container_styles.yaml
@@ -37,7 +35,7 @@ font: !include
 
   - &button_widget_vars
     width: 114
-    height: 75
+    height: 135
 
   - &wide_button_widget_vars
     width: 232
@@ -96,17 +94,17 @@ lvgl:
                   widgets:
                     - label:
                         id: lamp_icon
-                        align: TOP_MID
-                        text_font: mdi_md
+                        align: CENTER
+                        text_font: mdi_xxl
                         text: "\U000F0336" # mdi-lightbulb-outline
                     - label:
                         align: BOTTOM_MID
-                        text: 'Lamp'
+                        text: "Light"
 
               # Garage Door Status (stateful button)
               - button:
                   id: garage_door_btn
-                  checkable: true
+                  checkable: !lambda return (0 == id(door_status).state.compare(std::string{"opened"}) || 0 == id(door_status).state.compare(std::string{"closed"}));
                   <<: *button_widget_vars
                   on_click:
                     - homeassistant.action:
@@ -116,12 +114,19 @@ lvgl:
                   widgets:
                     - label:
                         id: garage_door_icon
-                        align: TOP_MID
-                        text_font: mdi_md
-                        text: "\U000F06D9" # mdi:garage
+                        align: CENTER
+                        text_font: mdi_xxl
+                        text: !lambda |-
+                          if(0 == id(door_status).state.compare(std::string{"opened"}) || (0 == id(door_status).state.compare(std::string{"open"})) ) {
+                            return "\U000F12D4"; // mdi:garage-open
+                          } else if(0 == id(door_status).state.compare(std::string{"closing"}) || (0 == id(door_status).state.compare(std::string{"opening"})) ) {
+                            return "\U000F0872"; // mdi:garage-alert
+                          } else {
+                            return "\U000F06D9"; // mdi:garage
+                          }
                     - label:
                         align: BOTTOM_MID
-                        text: 'Garage Door'
+                        text: "Garage Door"
 
               # Garage Indoor Door Status (stateful)
               - button:
@@ -131,7 +136,7 @@ lvgl:
                   widgets:
                     - label:
                         align: CENTER
-                        text: 'IndoorDoor'
+                        text: "Indoor\nDoor"
 
               # Garage Backyard Door Status (stateful)
               - button:
@@ -141,7 +146,7 @@ lvgl:
                   widgets:
                     - label:
                         align: CENTER
-                        text: 'BackyardDoor'
+                        text: "Backyard\nDoor"
 
 packages:
   # header
@@ -152,5 +157,3 @@ packages:
 
   # garage page sensors
   garage_sensors: !include { file: ../widgets/garage/sensors.yaml }
-
-  
