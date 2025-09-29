@@ -113,6 +113,10 @@ lvgl:
                           entity_id: automation.toggle_garage_door
                   widgets:
                     - label:
+                        id: garage_door_state
+                        align: TOP_MID
+                        text: !lambda return (id(door_status).state);
+                    - label:
                         id: garage_door_icon
                         align: CENTER
                         text_font: mdi_xxl

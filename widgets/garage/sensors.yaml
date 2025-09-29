@@ -56,6 +56,9 @@ text_sensor:
               }
               snprintf(buf, sizeof(buf), "%s", icon.c_str());
               return buf;
+        - lvgl.label.update:
+            id: garage_door_state
+            text: !lambda return (x);
 
   - platform: homeassistant
     id: lamp_status
