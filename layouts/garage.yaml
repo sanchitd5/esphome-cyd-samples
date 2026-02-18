@@ -63,6 +63,18 @@ lvgl:
             vars: { <<: *nav_widget_vars },
           }
       - <<: !include { file: widgets/boot_screen/widget.yaml }
+      - spinner:
+          id: loading_spinner
+          hidden: !lambda return (0 != id(door_status).state.compare(std::string{"opened"}) || 0 != id(door_status).state.compare(std::string{"closed"}));
+          width: 50
+          height: 50
+          align: CENTER
+          spin_time: 1s
+          arc_length: 60deg
+          arc_width: 16
+          indicator:
+            arc_color: 0x080888
+            arc_width: 16
   pages:
     - id: splash
       skip: true
@@ -104,13 +116,14 @@ lvgl:
               # Garage Door Status (stateful button)
               - button:
                   id: garage_door_btn
-                  checkable: !lambda return (0 == id(door_status).state.compare(std::string{"opened"}) || 0 == id(door_status).state.compare(std::string{"closed"}));
+                  clickable: !lambda return (0 == id(door_status).state.compare(std::string{"opened"}) || 0 == id(door_status).state.compare(std::string{"closed"}));
                   <<: *button_widget_vars
                   on_click:
                     - homeassistant.action:
-                        action: automation.trigger
+                        action: input_button.press
                         data:
-                          entity_id: automation.toggle_garage_door
+                          entity_id: input_button.toggle_garage_door
+                    - logger.log: "Garage door button clicked"
                   widgets:
                     - label:
                         id: garage_door_state
