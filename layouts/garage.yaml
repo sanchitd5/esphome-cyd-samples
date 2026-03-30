@@ -26,7 +26,7 @@ font: !include
     <<: !include styles/container_styles.yaml
     pad_left: 4
     pad_right: 4
-    scrollable: false # prevents scrollbars on pages where space is used up to the last pixel
+    scrollable: false
 
   - &button_layout
     <<: !include styles/button_layout.yaml
@@ -46,6 +46,12 @@ script:
     then:
       - lvgl.page.show: ${home_page}
 
+globals:
+  - id: correct_pin
+    type: std::string
+    restore_value: no
+    initial_value: '"1472"' # CHANGE THIS
+
 lvgl:
   default_font: roboto_md
   theme: !include themes/main.yaml
@@ -63,18 +69,6 @@ lvgl:
             vars: { <<: *nav_widget_vars },
           }
       - <<: !include { file: widgets/boot_screen/widget.yaml }
-      - spinner:
-          id: loading_spinner
-          hidden: !lambda return (0 != id(door_status).state.compare(std::string{"opened"}) || 0 != id(door_status).state.compare(std::string{"closed"}));
-          width: 50
-          height: 50
-          align: CENTER
-          spin_time: 1s
-          arc_length: 60deg
-          arc_width: 16
-          indicator:
-            arc_color: 0x080888
-            arc_width: 16
   pages:
     - id: splash
       skip: true
@@ -108,7 +102,7 @@ lvgl:
                         id: lamp_icon
                         align: CENTER
                         text_font: mdi_xxl
-                        text: "\U000F0336" # mdi-lightbulb-outline
+                        text: "\U000F0336"
                     - label:
                         align: BOTTOM_MID
                         text: "Light"
@@ -116,14 +110,30 @@ lvgl:
               # Garage Door Status (stateful button)
               - button:
                   id: garage_door_btn
-                  clickable: !lambda return (0 == id(door_status).state.compare(std::string{"opened"}) || 0 == id(door_status).state.compare(std::string{"closed"}));
+                  clickable: true
+                  checkable: false
+                  press_lock: true
                   <<: *button_widget_vars
                   on_click:
-                    - homeassistant.action:
-                        action: input_button.press
-                        data:
-                          entity_id: input_button.toggle_garage_door
-                    - logger.log: "Garage door button clicked"
+                    - if:
+                        condition:
+                          lambda: return (id(door_status).state == "opened" || id(door_status).state == "closed");
+                        then:
+                          - if:
+                              condition:
+                                lambda: return (id(door_status).state == "opened");
+                              then:
+                                - homeassistant.action:
+                                    action: input_button.press
+                                    data:
+                                      entity_id: input_button.toggle_garage_door
+                              else:
+                                - lvgl.label.update:
+                                    id: pin_display
+                                    text: "Type 4-digit PIN"
+                                - lvgl.page.show: pin_page
+                        else:
+                          - logger.log: "Door busy, ignored"
                   widgets:
                     - label:
                         id: garage_door_state
@@ -134,13 +144,13 @@ lvgl:
                         align: CENTER
                         text_font: mdi_xxl
                         text: !lambda |-
-                          if(0 == id(door_status).state.compare(std::string{"opened"}) || (0 == id(door_status).state.compare(std::string{"open"})) ) {
-                            return "\U000F12D4"; // mdi:garage-open
-                          } else if(0 == id(door_status).state.compare(std::string{"closing"}) || (0 == id(door_status).state.compare(std::string{"opening"})) ) {
-                            return "\U000F0872"; // mdi:garage-alert
-                          } else {
-                            return "\U000F06D9"; // mdi:garage
+                          auto state = id(door_status).state;
+                          if (state == "opened" || state == "open") {
+                            return "\U000F12D4"; 
+                          } else if (state == "closing" || state == "opening") {
+                            return "\U000F0872"; 
                           }
+                          return "\U000F06D9";
                     - label:
                         align: BOTTOM_MID
                         text: "Garage Door"
@@ -164,13 +174,147 @@ lvgl:
                     - label:
                         align: CENTER
                         text: "Backyard\nDoor"
+    - id: pin_page
+      on_load:
+        - lvgl.label.update:
+            id: page_title
+            text: "Enter PIN"
+        - lvgl.label.update:
+            id: pin_display
+            text: "Type 4-digit PIN"
+      widgets:
+        # PIN DISPLAY
+        - obj:
+            x: 14
+            y: 46
+            width: 212
+            height: 44
+            border_width: 2
+            border_color: 0x8FA8BD
+            pad_left: 10
+            pad_right: 10
+            pad_top: 6
+            pad_bottom: 6
+            bg_opa: 100%
+            bg_color: 0xFFFFFF
+            radius: 8
+            widgets:
+              - label:
+                  id: pin_display
+                  align: CENTER
+                  text: "Type 4-digit PIN"
+                  text_font: roboto_lg
+                  text_align: CENTER
+        - label:
+            x: 14
+            y: 93
+            text: "Auto-submit after 4 digits"
+            text_font: roboto_sm
+            text_color: 0x5B6B77
+        - button:
+            x: 14
+            y: 112
+            width: 212
+            height: 26
+            on_click:
+              - lvgl.label.update:
+                  id: pin_display
+                  text: "Type 4-digit PIN"
+              - lvgl.page.show: garage
+            widgets:
+              - label:
+                  align: CENTER
+                  text: "Cancel"
+                  text_font: roboto_md
+        # KEYPAD GRID
+        - buttonmatrix:
+            id: pin_keypad
+            x: 14
+            y: 142
+            width: 212
+            height: 170
+            one_checked: false
+            text_font: roboto_xl
+            items:
+              bg_color: 0xEFF5FA
+              text_color: 0x1D2F3F
+              radius: 10
+              pressed:
+                bg_color: 0xD8E8F5
+            rows:
+              - buttons:
+                  - text: 1
+                  - text: 2
+                  - text: 3
+              - buttons:
+                  - text: 4
+                  - text: 5
+                  - text: 6
+              - buttons:
+                  - text: 7
+                  - text: 8
+                  - text: 9
+              - buttons:
+                  - text: "<"
+                    key_code: "*"
+                    control:
+                      no_repeat: true
+                  - text: 0
+                    control:
+                      no_repeat: true
+                  - text: "OK"
+                    key_code: "#"
+                    control:
+                      no_repeat: true
+
+key_collector:
+  - source_id: pin_keypad
+    min_length: 4
+    max_length: 4
+    end_keys: "#"
+    end_key_required: false
+    back_keys: "*"
+    allowed_keys: "0123456789*#"
+    timeout: 5s
+    on_progress:
+      - if:
+          condition:
+            lambda: return x != "";
+          then:
+            - lvgl.label.update:
+                id: pin_display
+                text: !lambda "return std::string(x.size(), '*');"
+          else:
+            - lvgl.label.update:
+                id: pin_display
+                text: "Type 4-digit PIN"
+    on_result:
+      - if:
+          condition:
+            lambda: return x == id(correct_pin);
+          then:
+            - lvgl.label.update:
+                id: pin_display
+                text: "Correct"
+            - delay: 1s
+            - homeassistant.action:
+                action: input_button.press
+                data:
+                  entity_id: input_button.toggle_garage_door
+            - lvgl.label.update:
+                id: pin_display
+                text: "Type 4-digit PIN"
+            - lvgl.page.show: garage
+          else:
+            - lvgl.label.update:
+                id: pin_display
+                text: "Wrong"
+            - delay: 1s
+            - lvgl.label.update:
+                id: pin_display
+                text: "Type 4-digit PIN"
 
 packages:
-  # header
   header_sensors: !include { file: widgets/header/sensors.yaml }
-
-  # boot screen
   boot_screen_sensors: !include { file: widgets/boot_screen/sensors.yaml }
-
-  # garage page sensors
   garage_sensors: !include { file: ../widgets/garage/sensors.yaml }
