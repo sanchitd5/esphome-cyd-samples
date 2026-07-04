@@ -4,6 +4,12 @@ esphome:
   
 substitutions:
   home_page: garage
+  # HA entity bindings (override per node, see imporvement.md)
+  ha_lamp_entity: light.lamp
+  ha_door_status_sensor: sensor.door_status
+  ha_garage_toggle_button: input_button.toggle_garage_door
+  ha_indoor_door_sensor: binary_sensor.back_door_door
+  ha_backyard_door_sensor: binary_sensor.garage_backyard_door_sensor_contact
 
 packages:
   common: !include common.yaml

@@ -25,4 +25,6 @@
 - "\U000F06D9" # mdi:garage
 - "\U000F06DA" # mdi:garage-open
 - "\U000F0872" # mdi:garage-alert
-- "\U000F12D4" # mdi:garage-lock
+- "\U000F12D4" # mdi:garage-open-variant
+- "\U000F081B" # mdi:door-closed
+- "\U000F081C" # mdi:door-open

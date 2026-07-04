@@ -96,7 +96,7 @@ lvgl:
                     - homeassistant.action:
                         action: light.toggle
                         data:
-                          entity_id: light.lamp
+                          entity_id: ${ha_lamp_entity}
                   widgets:
                     - label:
                         id: lamp_icon
@@ -126,11 +126,11 @@ lvgl:
                                 - homeassistant.action:
                                     action: input_button.press
                                     data:
-                                      entity_id: input_button.toggle_garage_door
+                                      entity_id: ${ha_garage_toggle_button}
                               else:
                                 - lvgl.label.update:
                                     id: pin_display
-                                    text: "Type 4-digit PIN"
+                                    text: "Enter PIN"
                                 - lvgl.page.show: pin_page
                         else:
                           - logger.log: "Door busy, ignored"
@@ -155,25 +155,45 @@ lvgl:
                         align: BOTTOM_MID
                         text: "Garage Door"
 
-              # Garage Indoor Door Status (stateful)
+              # Garage Indoor Door Status (indicator only)
               - button:
                   id: indoor_door_status
                   checkable: false
+                  clickable: false
                   <<: *button_widget_vars
                   widgets:
                     - label:
+                        id: indoor_door_state
+                        align: TOP_MID
+                        text: "..."
+                    - label:
+                        id: indoor_door_icon
                         align: CENTER
-                        text: "Indoor\nDoor"
+                        text_font: mdi_xxl
+                        text: "\U000F081B"
+                    - label:
+                        align: BOTTOM_MID
+                        text: "Indoor"
 
-              # Garage Backyard Door Status (stateful)
+              # Garage Backyard Door Status (indicator only)
               - button:
                   id: backyard_door_status
                   checkable: false
+                  clickable: false
                   <<: *button_widget_vars
                   widgets:
                     - label:
+                        id: backyard_door_state
+                        align: TOP_MID
+                        text: "..."
+                    - label:
+                        id: backyard_door_icon
                         align: CENTER
-                        text: "Backyard\nDoor"
+                        text_font: mdi_xxl
+                        text: "\U000F081B"
+                    - label:
+                        align: BOTTOM_MID
+                        text: "Backyard"
     - id: pin_page
       on_load:
         - lvgl.label.update:
@@ -181,66 +201,55 @@ lvgl:
             text: "Enter PIN"
         - lvgl.label.update:
             id: pin_display
-            text: "Type 4-digit PIN"
+            text: "Enter PIN"
+            text_color: 0x1D2F3F
       widgets:
         # PIN DISPLAY
         - obj:
-            x: 14
+            x: 10
             y: 46
-            width: 212
-            height: 44
+            width: 220
+            height: 52
             border_width: 2
             border_color: 0x8FA8BD
-            pad_left: 10
-            pad_right: 10
-            pad_top: 6
-            pad_bottom: 6
+            pad_all: 6
             bg_opa: 100%
             bg_color: 0xFFFFFF
-            radius: 8
+            radius: 10
+            scrollable: false
             widgets:
               - label:
                   id: pin_display
                   align: CENTER
-                  text: "Type 4-digit PIN"
-                  text_font: roboto_lg
+                  text: "Enter PIN"
+                  text_font: roboto_xl
                   text_align: CENTER
         - label:
-            x: 14
-            y: 93
-            text: "Auto-submit after 4 digits"
+            align: TOP_MID
+            y: 100
+            text: "Auto-submits after 4 digits"
             text_font: roboto_sm
             text_color: 0x5B6B77
-        - button:
-            x: 14
-            y: 112
-            width: 212
-            height: 26
-            on_click:
-              - lvgl.label.update:
-                  id: pin_display
-                  text: "Type 4-digit PIN"
-              - lvgl.page.show: garage
-            widgets:
-              - label:
-                  align: CENTER
-                  text: "Cancel"
-                  text_font: roboto_md
-        # KEYPAD GRID
+        # KEYPAD GRID: X = cancel, < = backspace, auto-submit replaces OK
         - buttonmatrix:
             id: pin_keypad
-            x: 14
-            y: 142
-            width: 212
-            height: 170
+            x: 10
+            y: 118
+            width: 220
+            height: 196
             one_checked: false
-            text_font: roboto_xl
+            text_font: roboto_xxl
+            pad_all: 0
+            pad_row: 6
+            pad_column: 6
+            bg_opa: 0%
+            border_width: 0
             items:
               bg_color: 0xEFF5FA
               text_color: 0x1D2F3F
-              radius: 10
+              radius: 12
               pressed:
-                bg_color: 0xD8E8F5
+                bg_color: 0xC7DCF2
             rows:
               - buttons:
                   - text: 1
@@ -255,15 +264,20 @@ lvgl:
                   - text: 8
                   - text: 9
               - buttons:
-                  - text: "<"
-                    key_code: "*"
+                  - text: "X"
                     control:
                       no_repeat: true
+                    on_click:
+                      - lvgl.label.update:
+                          id: pin_display
+                          text: "Enter PIN"
+                          text_color: 0x1D2F3F
+                      - lvgl.page.show: garage
                   - text: 0
                     control:
                       no_repeat: true
-                  - text: "OK"
-                    key_code: "#"
+                  - text: "<"
+                    key_code: "*"
                     control:
                       no_repeat: true
 
@@ -271,11 +285,9 @@ key_collector:
   - source_id: pin_keypad
     min_length: 4
     max_length: 4
-    end_keys: "#"
-    end_key_required: false
     back_keys: "*"
-    allowed_keys: "0123456789*#"
-    timeout: 5s
+    allowed_keys: "0123456789*"
+    timeout: 10s
     on_progress:
       - if:
           condition:
@@ -284,10 +296,12 @@ key_collector:
             - lvgl.label.update:
                 id: pin_display
                 text: !lambda "return std::string(x.size(), '*');"
+                text_color: 0x1D2F3F
           else:
             - lvgl.label.update:
                 id: pin_display
-                text: "Type 4-digit PIN"
+                text: "Enter PIN"
+                text_color: 0x1D2F3F
     on_result:
       - if:
           condition:
@@ -296,23 +310,37 @@ key_collector:
             - lvgl.label.update:
                 id: pin_display
                 text: "Correct"
+                text_color: 0x2E7D32
             - delay: 1s
             - homeassistant.action:
                 action: input_button.press
                 data:
-                  entity_id: input_button.toggle_garage_door
+                  entity_id: ${ha_garage_toggle_button}
             - lvgl.label.update:
                 id: pin_display
-                text: "Type 4-digit PIN"
+                text: "Enter PIN"
+                text_color: 0x1D2F3F
             - lvgl.page.show: garage
           else:
             - lvgl.label.update:
                 id: pin_display
-                text: "Wrong"
+                text: "Wrong PIN"
+                text_color: 0xC62828
             - delay: 1s
             - lvgl.label.update:
                 id: pin_display
-                text: "Type 4-digit PIN"
+                text: "Enter PIN"
+                text_color: 0x1D2F3F
+    on_timeout:
+      - lvgl.label.update:
+          id: pin_display
+          text: "Timed out"
+          text_color: 0xC62828
+      - delay: 1s
+      - lvgl.label.update:
+          id: pin_display
+          text: "Enter PIN"
+          text_color: 0x1D2F3F
 
 packages:
   header_sensors: !include { file: widgets/header/sensors.yaml }
