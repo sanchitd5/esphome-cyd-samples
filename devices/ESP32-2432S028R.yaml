@@ -77,7 +77,7 @@ touchscreen:
     spi_id: touch
     cs_pin: 33
     interrupt_pin: 36
-    threshold: 400
+    threshold: 600
     calibration:
       x_min: 280
       x_max: 3860
@@ -91,9 +91,7 @@ touchscreen:
             condition: lvgl.is_paused
             then:
               - logger.log: "LVGL resuming"
-              - lvgl.resume:
-              - lvgl.widget.redraw:
-              - light.turn_on: backlight
+              - script.execute: wake_screen
     # on_touch:
     #   - lambda: |-
     #         ESP_LOGI("cal", "x=%d, y=%d, x_raw=%d, y_raw=%0d",
@@ -102,6 +100,29 @@ touchscreen:
     #           touch.x_raw,
     #           touch.y_raw
     #         );
+
+globals:
+  - id: touch_lockout
+    type: bool
+    restore_value: no
+    initial_value: 'false'
+
+script:
+  - id: wake_screen
+    mode: single
+    then:
+      - globals.set:
+          id: touch_lockout
+          value: 'true'
+      - light.turn_on: backlight
+      # LVGL stays paused here, so touch bounce and ghost bursts are discarded
+      - delay: 300ms
+      - lvgl.resume:
+      - lvgl.widget.redraw:
+      - delay: 400ms
+      - globals.set:
+          id: touch_lockout
+          value: 'false'
 
 number:
   - platform: template

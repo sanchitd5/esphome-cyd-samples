@@ -93,10 +93,14 @@ lvgl:
                   checkable: true
                   <<: *button_widget_vars
                   on_click:
-                    - homeassistant.action:
-                        action: light.toggle
-                        data:
-                          entity_id: ${ha_lamp_entity}
+                    - if:
+                        condition:
+                          lambda: return !id(touch_lockout);
+                        then:
+                          - homeassistant.action:
+                              action: light.toggle
+                              data:
+                                entity_id: ${ha_lamp_entity}
                   widgets:
                     - label:
                         id: lamp_icon
@@ -117,23 +121,29 @@ lvgl:
                   on_click:
                     - if:
                         condition:
-                          lambda: return (id(door_status).state == "opened" || id(door_status).state == "closed");
+                          lambda: return id(touch_lockout);
                         then:
+                          - logger.log: "Touch lockout, click ignored"
+                        else:
                           - if:
                               condition:
-                                lambda: return (id(door_status).state == "opened");
+                                lambda: return (id(door_status).state == "opened" || id(door_status).state == "closed");
                               then:
-                                - homeassistant.action:
-                                    action: input_button.press
-                                    data:
-                                      entity_id: ${ha_garage_toggle_button}
+                                - if:
+                                    condition:
+                                      lambda: return (id(door_status).state == "opened");
+                                    then:
+                                      - homeassistant.action:
+                                          action: input_button.press
+                                          data:
+                                            entity_id: ${ha_garage_toggle_button}
+                                    else:
+                                      - lvgl.label.update:
+                                          id: pin_display
+                                          text: "Enter PIN"
+                                      - lvgl.page.show: pin_page
                               else:
-                                - lvgl.label.update:
-                                    id: pin_display
-                                    text: "Enter PIN"
-                                - lvgl.page.show: pin_page
-                        else:
-                          - logger.log: "Door busy, ignored"
+                                - logger.log: "Door busy, ignored"
                   widgets:
                     - label:
                         id: garage_door_state
