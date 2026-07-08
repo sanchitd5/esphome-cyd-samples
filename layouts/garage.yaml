@@ -56,7 +56,10 @@ lvgl:
   default_font: roboto_md
   theme: !include themes/main.yaml
   on_idle:
-    timeout: !lambda "return (id(display_timeout).state * 1000);"
+    timeout: !lambda |-
+      float t = id(display_timeout).state;
+      if (isnan(t) || t < 10) t = 45;  // state is NaN/0 before restore; don't idle instantly
+      return (uint32_t)(t * 1000);
     then:
       - logger.log: "LVGL is idle"
       - light.turn_off: backlight
@@ -73,6 +76,9 @@ lvgl:
     - id: splash
       skip: true
       on_load:
+        # Defer: switching pages inside the initial screen's on_load races the
+        # boot screen-load and lands back on splash. Let boot settle first.
+        - delay: 500ms
         - script.execute: go_home
 
     - id: garage
